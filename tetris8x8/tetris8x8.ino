@@ -2,19 +2,23 @@
 
 #define BUTTON_LEFT_PIN  2
 #define BUTTON_RIGHT_PIN 5
+int button_left_status;
+int button_right_status;
 
-#define TURN_MAX 10
-unsigned long falling_speed = 300; // millisecond
-unsigned long button_delay = 350; // millisecond
+unsigned long falling_delay = 500; // millisecond
+unsigned long button_delay = 400; // millisecond
+
+#define TURN_MAX 50
+int turn;
 
 PixelRGB COLOR_BLACK = {0, 0, 0};
-PixelRGB COLOR_WHITE = {255, 255, 255};
 PixelRGB COLOR_RED = {255, 0, 0};
 PixelRGB COLOR_GREEN = {0, 255, 0};
 PixelRGB COLOR_BLUE = {0, 0, 255};
 PixelRGB COLOR_YELLOW = {255, 255, 0};
 PixelRGB COLOR_CYAN = {0, 255, 255};
 PixelRGB COLOR_MAGENTA = {255, 0, 255};
+PixelRGB COLOR_WHITE = {255, 255, 255};
 
 #define COLORS_MAX 3
 
@@ -57,8 +61,8 @@ typedef enum{
 
 StateEnum state;
 
-int movingpixel_x = -1;
-int movingpixel_y = -1;
+int movingpixel_x;
+int movingpixel_y;
 PixelRGB movingpixel_color;
 
 boolean colorCompare(const PixelRGB colorA, const PixelRGB colorB)
@@ -100,7 +104,6 @@ boolean checkAndClear(int mx, int my)
     int pos[8];
     int num;
     int x, y;
-    
     
     num = 0;
     pos[num] = mx;
@@ -197,15 +200,13 @@ void move_pixel_down()
   displayPixelRGBData(screen_data);
 }
 
-int turn;
 void movingpixel_start()
 {
-  movingpixel_x = 3; //random(ColorduinoScreenWidth); //todo change back
+  movingpixel_x = random(ColorduinoScreenWidth);
   movingpixel_y = ColorduinoScreenHeight - 1;
   movingpixel_color = colors[random(COLORS_MAX)];
   
   screen_data[movingpixel_x][movingpixel_y] = movingpixel_color;
-  
   displayPixelRGBData(screen_data);
   
   turn++;
@@ -255,8 +256,6 @@ void setup()
   
   state = StateStart;
 }
-int button_left_status = LOW;
-int button_right_status = LOW;
 
 void loop()
 {
@@ -290,10 +289,10 @@ void loop()
       }
       
       if(button_left_status == HIGH){
-        //Serial.println("Left button pressed");
+        Serial.println("Left button pressed");
       }
       if(button_right_status == HIGH){
-        //Serial.println("Right button pressed");
+        Serial.println("Right button pressed");
       }
       unsigned long time_now = millis();
       if(time_now - time_previous_for_button > button_delay){
@@ -308,9 +307,8 @@ void loop()
         button_right_status = LOW;
       }
       
-      if(time_now - time_previous > falling_speed){
+      if(time_now - time_previous > falling_delay){
         time_previous = time_now;
-
         move_pixel_down();
       }
     }
